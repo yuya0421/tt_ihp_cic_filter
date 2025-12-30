@@ -1,42 +1,63 @@
-![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
+# Discrete-to-ASIC Delta-Sigma Acquisition System
+（ディスクリート・ASIC連携によるデルタシグマデータ収集システム）
 
-# Tiny Tapeout Verilog Project Template
+## 1. プロジェクト概要
+本プロジェクトは、アナログ信号処理（PCB）とデジタル信号処理（ASIC）を統合した、ハードウェア・イン・ザ・ループ（HIL）構成のデータ収集システム構築プロジェクトです。
+Tiny Tapeout（130nmプロセス）を用いて**CICデシメーションフィルタ**をASIC上に実装し、自作のディスクリート・デルタシグマ変調器（外部基板）からの1bit PDM信号をデシメーション処理・復調します。
 
-- [Read the documentation for project](docs/info.md)
+本設計の主目的は、単なる回路実装にとどまらず、アナログ・フロントエンドからデジタル・バックエンドまでを設計・検証し、ミックスドシグナル・システムの統合プロセスを実証することにあります。
 
-## What is Tiny Tapeout?
+## 2. 開発ステータスとロードマップ (Status & Roadmap)
+現在、ASIC側の論理設計および検証が完了しており、ファウンドリへの製造委託（テープアウト）に向けた最終調整段階にあります。
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+### Phase 1: ASIC論理設計・検証 【完了 (Done)】
+* **RTL実装:** Verilog-2001によるCICフィルタの記述完了。
+* **Pre-Silicon検証:** オープンEDAツール（Icarus Verilog）を用いたシミュレーションを実施済み。
+    * テストベンチ内でPDM変調モデルを構築し、1kHz正弦波の入力に対してASIC回路が正しく復調・デシメーション動作を行うことを波形レベルで確認しました。
 
-To learn more and get started, visit https://tinytapeout.com.
+### Phase 2: テープアウト・PCB設計 【計画 (Planned)】
+* **テープアウト:** 2025年3月のTiny Tapeout IHPシャトルへ提出予定。
+* **PCB開発:** ASIC製造期間（待ち時間）を利用し、アナログフロントエンド基板の設計・製造を行います。確定したASICのピン配置や電気的特性に合わせて最適化を行います。
 
-## Set up your Verilog project
+### Phase 3: 実機評価 (System Validation) 【2026年9月予定】
+* **実チップ納品:** 2026年9月頃のチップ到着に合わせて、PCBとASICを結合。
+* **統合テスト:** Digilent Analog Discoveryを用いた実波形観測により、S/N比や周波数応答の評価を実施します。
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+## 3. 設計思想 (Design Philosophy)
+限られたリソースの中で、最大の学習効果とシステムの堅牢性を確保するため、以下の3点を設計指針としました。
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+### (1) アナログ・デジタル協調設計 (Co-Design)
+既存のIPコアを使用せず、あえて外部PCB上にディスクリート部品で2次デルタシグマ変調器を構成します。これにより、ブラックボックス化されがちなアナログ変調挙動を物理的に可視化・調整可能とし、ASIC側のデジタルフィルタとのパラメータ整合性を物理層レベルで検証する構成としています。
 
-## Enable GitHub actions to build the results page
+### (2) ミニマリズムによる信頼性確保 (Simplicity First)
+ASIC製造プロセスにおけるリスクを最小化するため、論理設計はシンプルさを最優先しました。
+* **固定パラメータ:** 複雑な係数可変ロジックを排除し、デシメーション率を固定。
+* **リソース最適化:** 入力ビット幅やフィルタ段数を理論上の必要最小限（N=3）に留め、検証容易性を高めています。
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+### (3) 実機検証を重視したインターフェース
+シミュレーション上の理想値だけでなく、実機での波形観測を前提としたI/O設計を行いました。ASIC内部の16bit演算結果に対し、測定器（ロジックアナライザ）の分解能に合わせたビットトランケーション（上位8bit出力）を実装し、実時間での波形再構成を可能にしています。
 
-## Resources
+## 4. 技術仕様 (Specifications)
 
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
+### システム全体仕様
+| 項目 | 仕様 | 備考 |
+| :--- | :--- | :--- |
+| **入力フォーマット** | 1-bit PDM (Pulse Density Modulation) | 自作外部基板（2次変調器）より入力予定 |
+| **ロジック電圧** | 3.3V (LVCMOS) | Tiny Tapeout Demo Board準拠 |
+| **動作クロック** | 2.048 MHz | 外部基板のサンプリングレートと同期 |
+| **信号帯域** | ~10 kHz | 音声・センサ帯域を想定 |
 
-## What next?
+### ASIC内部（CICフィルタ）仕様
+| パラメータ | 設定値 | 設計根拠 |
+| :--- | :--- | :--- |
+| **次数 ($N$)** | 3 | 2次デルタシグマ変調の量子化ノイズ整形に対応 |
+| **デシメーション率 ($R$)** | 32 | 2.048 MHz入力 → 64 kHz出力 |
+| **遅延 ($M$)** | 1 | 標準構成 |
+| **内部ビット幅** | 16-bit | オーバーフローを許容するラップアラウンド演算用に設計 ($B_{out} = B_{in} + N \log_2 R$) |
+| **出力ビット幅** | 8-bit | 外部ピン数制約に合わせMSB側8bitを出力 |
 
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+## 5. 使用ツール・環境
+* **HDL:** Verilog-2001
+* **Simulation:** Icarus Verilog, GTKWave (EDA Playground)
+* **Implementation:** Tiny Tapeout IHP 130nm Open Source PDK
+* **Measurement (Plan):** Digilent Analog Discovery 2/3
