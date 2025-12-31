@@ -1,20 +1,14 @@
-<!---
-
-This file is used to generate your project datasheet. Please fill in the information below and delete any unused
-sections.
-
-You can also include images in this folder and reference them in the markdown. Each image must be less than
-512 kb in size, and the combined size of all images must be less than 1 MB.
--->
-
 ## How it works
-
-Explain how your project works
+Input 1-bit PDM signal from an external discrete 2nd-order Delta-Sigma Modulator.
+This ASIC implements a 3rd-order CIC filter (Decimation Ratio = 32) to demodulate the PDM signal into 8-bit PCM audio data.
+The design focuses on Hardware-in-the-Loop verification between a custom PCB and the ASIC.
 
 ## How to test
-
-Explain how to use your project
+1.  **Stimulus:** Generate a 10kHz Sine wave using Digilent Analog Discovery (Wavegen) and input it to the external PCB.
+2.  **Connection:** Connect the PCB output to `ui_in[0]`.
+3.  **Clock:** Synchronize the PCB clock with the ASIC clock (2.048 MHz).
+4.  **Observation:** Monitor `uo_out[7:0]` with a Logic Analyzer. The reconstructed waveform should match the input sine wave.
 
 ## External hardware
-
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+* Custom PCB (Discrete 2nd-order Delta-Sigma Modulator)
+* Digilent Analog Discovery 2/3 (Wavegen & Logic Analyzer)
