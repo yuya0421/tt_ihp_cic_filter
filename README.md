@@ -14,6 +14,9 @@ Tiny Tapeout（130nmプロセス）を用いて**CICデシメーションフィ�
 * **RTL実装:** Verilog-2001によるCICフィルタの記述完了。
 * **Pre-Silicon検証:** オープンEDAツール（Icarus Verilog）を用いたシミュレーションを実施済み。
     * テストベンチ内でPDM変調モデルを構築し、1kHz正弦波の入力に対してASIC回路が正しく復調・デシメーション動作を行うことを波形レベルで確認しました。
+ 
+    * <img width="836" height="259" alt="image" src="https://github.com/user-attachments/assets/f00456fd-f33d-4d7d-936f-e93db4e70c2f" />
+
 
 ### Phase 2: テープアウト・PCB設計 【計画 (Planned)】
 * **テープアウト:** 2025年3月のTiny Tapeout IHPシャトルへ提出予定。
